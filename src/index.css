@@ -10,3 +10,7 @@
     transform: translateY(0);
   }
 }
+
+.font-VDL-LogoJrBlack {
+  font-family: "VDL-LogoJrBlack", sans-serif;
+}

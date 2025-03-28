@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import top_background from "./assets/top-background.svg";
 
 interface Candidate {
   id: number;
@@ -7,26 +8,64 @@ interface Candidate {
   votes: number;
 }
 
+const backendUrl = "https://2025sprvotingsitebackend-production.up.railway.app";
+
 const App: React.FC = () => {
-  // 20人分の候補者データ（ダミーデータ）
-  const initialCandidates: Candidate[] = Array.from({ length: 20 }, (_, i) => ({
-    id: i + 1,
-    name: `Candidate ${i + 1}`,
-    imageUrl: `https://via.placeholder.com/150?text=C${i + 1}`,
-    votes: 0,
-  }));
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
 
-  const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
+  // 初期データ（メンター情報）の取得
+  useEffect(() => {
+    fetch(`${backendUrl}/mentors`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("候補者情報の取得に失敗しました");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // API のレスポンスは { mentors: [...] } を想定
+        const mentors = data.mentors.map((mentor: any) => ({
+          id: mentor.id,
+          name: mentor.name,
+          votes: mentor.voting, // API では voting というフィールド名
+          imageUrl: `https://via.placeholder.com/150?text=C${mentor.id}`,
+        }));
+        setCandidates(mentors);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
 
-  // 投票処理：対象候補の票数を1増加
+  // 投票処理: POST 通信を行い、返ってきた投票数で更新
   const handleVote = (id: number) => {
-    setCandidates((prev) =>
-      prev.map((candidate) =>
-        candidate.id === id
-          ? { ...candidate, votes: candidate.votes + 1 }
-          : candidate
-      )
-    );
+    fetch(`${backendUrl}/${id}/count`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          // 404の場合などはエラーとして処理
+          throw new Error("候補者が存在しません");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // 返ってきた data は { id, name, voting } なので voting を votes に反映
+        setCandidates((prev) =>
+          prev.map((candidate) =>
+            candidate.id === data.id
+              ? { ...candidate, votes: data.voting }
+              : candidate
+          )
+        );
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("投票に失敗しました。");
+      });
   };
 
   // 投票数の多い順にソートし、上位3名をランキングとして取得
@@ -38,11 +77,7 @@ const App: React.FC = () => {
     <div className="text-center font-sans">
       {/* 1. キービジュアル */}
       <section className="my-5">
-        <img
-          src="https://via.placeholder.com/800x400?text=Key+Visual"
-          alt="Key Visual"
-          className="w-full"
-        />
+        <img src={top_background} alt="Key Visual" className="w-full" />
       </section>
 
       {/* 2. 総選挙説明 */}

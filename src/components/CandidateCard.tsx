@@ -6,7 +6,8 @@ export const CandidateCard: React.FC<{
   mentor: { id: number; img: string };
   candidate?: Candidate;
   onVote: (id: number) => void;
-}> = ({ mentor, candidate, onVote }) => {
+  useJokeImages: boolean;
+}> = ({ mentor, candidate, onVote, useJokeImages }) => {
   const [showAnimation, setShowAnimation] = useState(false);
 
   const handleClick = () => {
@@ -18,11 +19,16 @@ export const CandidateCard: React.FC<{
     }
   };
 
+  // useJokeImages が true なら固定画像、false なら mentor.img を使用
+  const imageSrc = useJokeImages
+    ? "/assets/mentors-joke/ayapo.svg"
+    : `/assets/mentors/${mentor.img}`;
+
   return (
     <div className="p-4 w-80 relative mt-1">
       <div className="relative group">
         <img
-          src={`/assets/mentors/${mentor.img}`}
+          src={imageSrc}
           alt={mentor.img}
           className="w-full h-full mx-auto filter transition duration-200 group-hover:brightness-75"
         />

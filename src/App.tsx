@@ -12,6 +12,9 @@ const App: React.FC = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // URLの末尾が /ayapo なら useJokeImages を true にする
+  const useJokeImages = window.location.pathname.endsWith("/ayapo");
+
   // 投票用データの取得
   useEffect(() => {
     fetch(`${backendUrl}/mentors`)
@@ -22,7 +25,6 @@ const App: React.FC = () => {
         return response.json();
       })
       .then((data) => {
-        // API のレスポンスは { mentors: [...] } を想定
         const mentorsData = data.mentors.map((mentor: any) => ({
           id: mentor.id,
           name: mentor.name,
@@ -88,7 +90,6 @@ const App: React.FC = () => {
   // mentors 配列を id 昇順にソート（全20件）
   const sortedMentors = [...mentors].sort((a, b) => a.id - b.id);
 
-  // Loading中は指定のLottieアニメーションを表示
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -124,6 +125,7 @@ const App: React.FC = () => {
                 mentor={mentor}
                 candidate={candidate}
                 onVote={handleVote}
+                useJokeImages={useJokeImages}
               />
             );
           })}
@@ -149,6 +151,7 @@ const App: React.FC = () => {
                 mentor={mentorData}
                 candidate={candidate}
                 index={index}
+                useJokeImages={useJokeImages}
               />
             ) : null;
           })}

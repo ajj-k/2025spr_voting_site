@@ -1,6 +1,5 @@
 name = "2025spr-meijoho"
 compatibility_date = "2025-03-28"
-route = "https://2025spr-meijoho.bouando4ha.workers.dev/*"
 main = "workers-site/index.js"
 
 [site]

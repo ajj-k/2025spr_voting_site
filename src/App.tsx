@@ -13,7 +13,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   // URLの末尾が /ayapo なら useJokeImages を true にする
-  const useJokeImages = window.location.pathname.endsWith("/ayapo");
+  const useJokeImages = window.location.hash.endsWith("/ayapo");
 
   // 投票用データの取得
   useEffect(() => {

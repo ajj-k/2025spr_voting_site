@@ -8,7 +8,7 @@ const sortedMentors = [...mentors].sort((a, b) => a.id - b.id);
 
 const FirstSection: React.FC = () => {
   // URL の末尾が "/ayapo" なら true
-  const useJokeImages = window.location.pathname.endsWith("/ayapo");
+  const useJokeImages = window.location.hash.endsWith("/ayapo");
 
   // useJokeImages が true なら固定画像、false なら mentor.img を利用
   const getImageSrc = (mentor: { id: number; img: string }) =>

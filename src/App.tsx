@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import top_background from "./assets/top-background.svg";
+import top_left from "./assets/left_contents.svg";
+import top_right from "./assets/right_contents.svg";
 
 interface Candidate {
   id: number;
@@ -37,8 +39,18 @@ const App: React.FC = () => {
       });
   }, []);
 
-  // 投票処理: POST 通信を行い、返ってきた投票数で更新
+  // 投票処理: 楽観的更新を行い、POST 通信で最新票数に更新
   const handleVote = (id: number) => {
+    // 楽観的更新: ボタン押下と同時に票数を+1
+    setCandidates((prev) =>
+      prev.map((candidate) =>
+        candidate.id === id
+          ? { ...candidate, votes: candidate.votes + 1 }
+          : candidate
+      )
+    );
+
+    // API に投票リクエストを送信
     fetch(`${backendUrl}/${id}/count`, {
       method: "POST",
       headers: {
@@ -47,13 +59,12 @@ const App: React.FC = () => {
     })
       .then((response) => {
         if (!response.ok) {
-          // 404の場合などはエラーとして処理
           throw new Error("候補者が存在しません");
         }
         return response.json();
       })
       .then((data) => {
-        // 返ってきた data は { id, name, voting } なので voting を votes に反映
+        // APIから返ってきた最新の票数で state を更新
         setCandidates((prev) =>
           prev.map((candidate) =>
             candidate.id === data.id
@@ -65,6 +76,14 @@ const App: React.FC = () => {
       .catch((error) => {
         console.error("Error:", error);
         alert("投票に失敗しました。");
+        // エラー時は楽観的更新を戻す（票数を-1）
+        setCandidates((prev) =>
+          prev.map((candidate) =>
+            candidate.id === id
+              ? { ...candidate, votes: candidate.votes - 1 }
+              : candidate
+          )
+        );
       });
   };
 
